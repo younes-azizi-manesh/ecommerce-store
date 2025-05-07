@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Customer\HomeController;
 use Illuminate\Support\Facades\Route;
+
+
+Route::get('/', [HomeController::class, 'home'])->name('home');
 
 // Auth routes
 Route::middleware(['throttle', 'guest'])->group(function () {

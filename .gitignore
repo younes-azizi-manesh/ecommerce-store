@@ -1,5 +1,6 @@
 /.phpunit.cache
 /node_modules
+/config/otp.php
 /public/build
 /public/hot
 /public/storage

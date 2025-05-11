@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\Web\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ConfirmRequest extends FormRequest
+class AuthRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,7 @@ class ConfirmRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'otp' => 'required|min:6|max:6',
+            'id' => 'required|min:11|max:64|regex:/^[a-zA-Z0-9_.@\+]*$/',
         ];
     }
 }

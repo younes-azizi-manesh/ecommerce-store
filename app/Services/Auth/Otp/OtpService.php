@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Auth;
+namespace App\Services\Auth\Otp;
 
 use App\Exceptions\CustomRedirectException;
 use App\Http\Interfaces\NotificationServiceInterface;

@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Web\Auth;
 
 use App\Exceptions\CustomRedirectException;
-use App\Http\Controllers\BaseController;
-use App\Http\Requests\Auth\AuthRequest;
-use App\Http\Requests\Auth\ConfirmRequest;
+use App\Http\Controllers\Web\BaseController;
+use App\Http\Requests\Web\Auth\AuthRequest;
+use App\Http\Requests\Web\Auth\ConfirmOtpRequest;
 use App\Services\Auth\OtpService;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends BaseController
@@ -32,7 +31,7 @@ class AuthController extends BaseController
         }
         return view('auth.login-confirm', compact('token', 'otp'));
     }
-    public function loginConfirm($token, ConfirmRequest $request, OtpService $otpService)
+    public function loginConfirm($token, ConfirmOtpRequest $request, OtpService $otpService)
     {
         try
         {

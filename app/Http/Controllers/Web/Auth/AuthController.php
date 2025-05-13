@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Web\Auth;
 
-use App\Exceptions\CustomRedirectException;
 use App\Http\Controllers\Web\BaseController;
 use App\Http\Requests\Web\Auth\AuthRequest;
 use App\Http\Requests\Web\Auth\ConfirmOtpRequest;
-use App\Services\Auth\OtpService;
+use App\Services\Auth\Otp\OtpService;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends BaseController
@@ -33,31 +32,32 @@ class AuthController extends BaseController
     }
     public function loginConfirm($token, ConfirmOtpRequest $request, OtpService $otpService)
     {
-        try
+        
+        $validated = $request->all(); 
+        $result = $otpService->updateAndLogin($token, $validated['otp']);
+
+        if($result['success'] === false && $result['message'] === 'url is invalid')
         {
-            $validated = $request->all(); 
-            $otpService->updateAndLogin($token, $validated['otp']);
-            return redirect()->route('home');
-        }catch(CustomRedirectException $e)
+            return $this->customRedirect('auth.login-register-form', 'swal-error', $result['message']);
+        }
+        if($result['success'] === false && $result['message'] === 'otp is invalid')
         {
-            if(in_array('codeNotMatch', $e->getExtraData()))
-            {
-                return $this->customRedirect('auth.login-confirm-form', 'swal-error', 'کد وارد شده نامعتبر است', ['token' => $token]);
-            }
-            return $this->customRedirect('auth.login-register-form', 'swal-error', 'ادرس وارد شده نامعتبر است');
+            return $this->customRedirect('auth.login-confirm-form', 'swal-error',$result['message'] , ['token' => $token]);
         }
 
+        return $this->customRedirect('home', 'swal-success', $result['message']);
     }
     public function loginResendOtp($token, OtpService $otpService)
     {
-        try
+
+        $result = $otpService->reSendOtp($token);
+        if($result['success'] === false)
         {
-            $otpService->reSendOtp($token);
-            return redirect()->route('auth.login-confirm', $token);
-        }catch(CustomRedirectException $e)
-        {
-            return $this->customRedirect('auth.login-register-form', 'swal-error', 'ادرس وارد شده نامعتبر است');
+            return $this->customRedirect('auth.login-register-form', 'swal-error', $result['message']);
         }
+       
+        
+        return redirect()->route('auth.login-confirm', $token);
     }
 
 

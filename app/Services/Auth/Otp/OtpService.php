@@ -2,7 +2,6 @@
 
 namespace App\Services\Auth\Otp;
 
-use App\Exceptions\CustomRedirectException;
 use App\Http\Interfaces\NotificationServiceInterface;
 use App\Models\User;
 use App\Repositories\OtpRepository;
@@ -43,7 +42,7 @@ class OtpService
         ],[], ['*']);
 
         if (empty($otp)) {
-            throw new CustomRedirectException('آدرس وارد شده نامعتبر است');
+            return ['success' => false, 'message' => 'url is invalid'];
         }
 
         $user = $otp->user;
@@ -63,10 +62,10 @@ class OtpService
     {
         $otp = $this->findWhere(['token' => $token, 'used' => 0, 'created_at' => ['>=', $this->getMinutes(5)]], [], ['*']);
         if (empty($otp)) {
-            throw new CustomRedirectException('ادرس وارد شده نامعتبر است');
+            return ['success' => false, 'message' => 'url is invalid'];
         }
         if ($otp->otp_code !== $otpCode) {
-            throw new CustomRedirectException('کد وارد شده نامعتبر است', extraData: ['codeNotMatch']);
+            return ['success' => false, 'message' => 'otp is invalid'];
         }
         $this->otpRepo->update($otp->id, ['used' => 1]);
         $user = $otp->user;
@@ -74,6 +73,7 @@ class OtpService
             $this->userService->markMobileVerified($user);
         }
         Auth::login($user);
+        return ['success' => true, 'message' => 'you are logged in'];
     }
 
     public function makeOtp(User $user, array $check)

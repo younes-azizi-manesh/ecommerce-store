@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Http\Interfaces\NotificationServiceInterface;
 use App\Models\Auth\Otp;
 use App\Models\User;
 use App\Repositories\OtpRepository;
 use App\Repositories\UserRepository;
+use App\Services\Auth\SMS\MelipayamakService;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(UserRepository::class, function($app){
             return new UserRepository($app->make(User::class));
         });
+        $this->app->bind(NotificationServiceInterface::class, MelipayamakService::class);
     }
 
     /**

@@ -22,7 +22,7 @@ class ConfirmOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'token' => ['required', 'string', 'size:60'],
+            'otp_token' => ['required', 'string', 'size:60'],
             'otp_code' => ['required', 'digits:6'],
         ];
     }

@@ -39,7 +39,7 @@ class OtpService
             'token' => $token,
             'used' => 0,
             'created_at' => ['>=', $this->getMinutes(5)]
-        ],[], ['*']);
+        ], [], ['*']);
 
         if (empty($otp)) {
             return ['success' => false, 'message' => 'url is invalid'];
@@ -52,10 +52,35 @@ class OtpService
             ->setTo($user->mobile)
             ->setBodyId(314163)
             ->send();
+        return ['success' => true, 'message' => 'send otp is successful'];
     }
     public function getMinutes(?int $minutes)
     {   // set minute return subMinutes, otherwise return now.
         return isset($minutes) ? Carbon::now()->subMinutes($minutes)->toDateTimeString() : Carbon::now();
+    }
+
+    public function loginViaApi(string $otpToken, string $otpCode)
+    {
+        $otp = $this->findWhere(['token' => $otpToken, 'used' => 0, 'created_at' => ['>=', $this->getMinutes(5)]], [], ['*']);
+
+        if (empty($otp)) {
+            return ['success' => false, 'message' => 'url is invalid'];
+        }
+
+        if ($otp->otp_code !== $otpCode) {
+            return ['success' => false, 'message' => 'otp is invalid'];
+        }
+
+        $this->otpRepo->update($otp->id, ['used' => 1]);
+        $user = $otp->user;
+
+        if ($otp->type == 0) {
+            $this->userService->markMobileVerified($user);
+        }
+
+        $accessToken = $user->createToken('auth-token')->plainTextToken;
+
+        return ['success' => true, 'message' => 'you are logged in', 'accessToken' => $accessToken, 'user' => $user];
     }
 
     public function updateAndLogin($token, $otpCode)
@@ -95,7 +120,7 @@ class OtpService
 
     public function checkLoginId($loginId)
     {
-        if(preg_match('/^(\+98|98|0)9\d{9}$/', $loginId)) {
+        if (preg_match('/^(\+98|98|0)9\d{9}$/', $loginId)) {
             // 0 =>mobile
             //check mobile format
             $loginId = ltrim($loginId, 0);
